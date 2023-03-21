@@ -1,60 +1,23 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.1.0
-  aws-cli: circleci/aws-cli@2.0.3
-  eb: circleci/aws-elastic-beanstalk@1.0.0
-
-commands:
-  install_client:
-    description: "command for Client Installation"
-    steps:
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            # Find a cache corresponding to this specific package.json checksum
-            # when this file is changed, this key will fail
-            - v1-dependencies-{{ checksum "package.json" }}
-            # Find the most recently generated cache used from any branch
-            - v1-dependencies-
-      - run:
-          name: Install Front-End Dependencies
-          command: yarn frontend:install
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-  install_server:
-    description: "command for Server Installation"
-    steps:
-      - restore_cache:
-          keys:
-            - v2-dependencies-{{ checksum "package.json" }}
-            - v2-dependencies-
-      - run:
-          name: Install Back-End Dependencies
-          command: yarn api:install
-      - save_cache:
-          paths:
-            - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
-
+  node: circleci/node@4.2.0
+  aws-cli: circleci/aws-cli@2.0.0
 jobs:
   frontend:
     working_directory: ~/app/udagram-frontend
     executor: node/default
     steps:
-      - node/install
-      - node/install-yarn
-      - checkout
-      - install_client
+      - checkout:
+          path: ~/app
+      - node/install-packages:
+          app-dir: ~/app/udagram-frontend
       - run:
-          name: Build Front-End
-          command: yarn frontend:build
-      -aws-cli/install
-      -run:
-        name: Deploy Front-End
-        command: aws s3 cp --recursive --acl public-read ./www s3://abanob-udagram/
-
+          name: Build Frontend
+          command: npm run build
+      - aws-cli/install
+      - run:
+          name: Deploy Frontend
+          command: aws s3 cp --recursive --acl public-read ./www $S3_BUCKET_FRONTEND
   server:
     working_directory: ~/app/udagram-api
     executor: node/default
@@ -76,11 +39,8 @@ jobs:
             aws s3 cp ./www/Archive.zip $S3_BUCKET_SERVER
             aws elasticbeanstalk create-application-version --application-name $EB_APP --version-label <<pipeline.git.revision>> --source-bundle S3Bucket="$EB_BUCKET",S3Key="Archive.zip"
             aws elasticbeanstalk update-environment --application-name $EB_APP --environment-name $EB_ENV --version-label <<pipeline.git.revision>>
-
 workflows:
-  build_deploy:
+  build_and_deploy:
     jobs:
-      - build
-      - deploy:
-          requires:
-            - build
+      - frontend
+      - server
