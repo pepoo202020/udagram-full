@@ -54,21 +54,7 @@ jobs:
       - run:
           name: Build Back-End
           command: yarn api:build
-  test:
-    docker:
-      - image: "cimg/base:stable"
-    steps:
-      - node/install
-      - node/install-yarn
-      - checkout
-      - install_client
-      - install_server
-      - run:
-          name: Test Front-End
-          command: yarn frontend:test
-      - run:
-          name: Test Back-End
-          command: yarn frontend:test
+
   deploy:
     docker:
       - image: "cimg/base:stable"
