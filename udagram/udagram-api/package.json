@@ -1,0 +1,59 @@
+{
+  "name": "udagram-api",
+  "version": "2.0.0",
+  "description": "",
+  "engines": {
+    "npm": ">=8.0.0 <9.0.0",
+    "node": "16.0.0"
+  },
+  "main": "server.js",
+  "scripts": {
+    "start": "node .",
+    "tsc": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
+    "prod": "tsc && node ./www/server.js",
+    "clean": "rm -rf www/ || true",
+    "archive": "cd www && 7z a -tzip Archive.zip .  && cd ..",
+    "deploy3": "npm run build && eb list && eb use aws-circle-ci-api-dev && eb deploy",
+    "deploy1": "eb list && eb use abanob-udagram-api && eb deploy",
+    "deploy": "chmod +x ./bin/deploy.sh && ./bin/deploy.sh",
+    "build": "npm run clean && tsc && cp -rf src/config www/config && cp .npmrc www/.npmrc && cp package.json www/package.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Gabriel Ruttner",
+  "license": "ISC",
+  "dependencies": {
+    "@types/bcryptjs": "2.4.2",
+    "@types/jsonwebtoken": "^8.3.2",
+    "aws-sdk": "^2.429.0",
+    "bcryptjs": "2.4.3",
+    "body-parser": "^1.18.3",
+    "dotenv": "^8.2.0",
+    "email-validator": "^2.0.4",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.7.1",
+    "reflect-metadata": "^0.1.13",
+    "sequelize": "^6.5.0",
+    "sequelize-typescript": "^2.1.3"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.26",
+    "@types/cors": "^2.8.6",
+    "@types/dotenv": "^8.2.0",
+    "@types/node": "^18.15.5",
+    "@types/sequelize": "^4.27.44",
+    "@types/validator": "^10.9.0",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.1",
+    "cors": "^2.8.5",
+    "eslint": "^6.8.0",
+    "eslint-config-google": "^0.14.0",
+    "mocha": "^6.1.4",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.2"
+  }
+}
